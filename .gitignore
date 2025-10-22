@@ -78,3 +78,14 @@ models/
 .vscode/
 .idea/
 DeepfakeBench/training/clip-vit-large-patch14/.git/
+
+
+DeepfakeBench/training/models--openai--clip-vit-large-patch14/
+models/
+checkpoints/
+outputs/
+runs/
+results/
+*.safetensors
+*.pt
+*.pth
