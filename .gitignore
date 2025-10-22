@@ -1,0 +1,80 @@
+__pycache__/
+*.py[cod]
+*.so
+.env
+.venv
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+*.out
+
+# Data / Checkpoints
+data/
+datasets/
+outputs/
+checkpoints/
+runs/
+results/
+*.pth
+*.pt
+*.npy
+*.pkl
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+*.pth
+*.log
+*.tmp
+*.npz
+*.mp4
+*.csv
+*.xlsx
+*.png
+*.jpg
+*.pyc
+*.json
+*.dat
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.lzma
+*.tar.lz
+*.tar.lz4
+*.tar.zst
+*.tar.zstd
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+effort_env/
+.ipynb_checkpoints/
+*.backup
+
+# Logs / Outputs
+logs/
+outputs/
+checkpoints/
+runs/
+results/
+*.log
+
+# Models / Data
+models/
+*.pth
+*.pt
+*.npy
+*.pkl
+
+# Others
+.DS_Store
+.vscode/
+.idea/
+DeepfakeBench/training/clip-vit-large-patch14/.git/

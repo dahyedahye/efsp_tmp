@@ -283,10 +283,16 @@ if __name__ == '__main__':
 
     model = get_model(opt.arch, opt)
     if opt.use_svd:
-        state_dict = torch.load(opt.ckpt, map_location='cpu')['model']
+        # [dahye modi start]
+        # state_dict = torch.load(opt.ckpt, map_location='cpu')['model']
+        state_dict = torch.load(opt.ckpt, map_location='cpu')
+        # [dahye modi end]
         model.load_state_dict(state_dict)
     else:
-        state_dict = torch.load(opt.ckpt, map_location='cpu')['model']
+        # [dahye modi start]
+        # state_dict = torch.load(opt.ckpt, map_location='cpu')['model']
+        state_dict = torch.load(opt.ckpt, map_location='cpu')
+        # [dahye modi end]
         model.fc.load_state_dict(state_dict)
     
     print ("Model loaded..")

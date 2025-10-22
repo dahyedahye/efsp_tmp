@@ -304,6 +304,16 @@ class DeepfakeAbstractBaseDataset(data.Dataset):
             ValueError: If the loaded image is None.
         """
         size = self.config['resolution'] # if self.mode == "train" else self.config['resolution']
+        # edited by dahye start
+        relative_path = file_path.replace('\\', '/')
+        # 2. 기본 경로(root)와 상대 경로 결합
+        #    config['dataset_root_rgb'] 값이 YAML에 설정되어 있다고 가정
+        full_path = os.path.join(self.config['dataset_root_rgb'], relative_path)
+        file_path = full_path
+
+        # 3. (선택적) 경로 정규화 (예: /data/dataset/intellectus/./FaceForensics++ -> /data/dataset/intellectus/FaceForensics++)
+        file_path = os.path.normpath(file_path)
+        # edited by dahye end
         if not self.lmdb:
             assert os.path.exists(file_path), f"{file_path} does not exist"
             img = cv2.imread(file_path)

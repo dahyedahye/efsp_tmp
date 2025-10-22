@@ -5,15 +5,28 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoProcessor, CLIPModel, ViTModel, ViTConfig
 import loralib as lora
+# [dahye modi start]
+import os
+# [dahye modi end]
 
 
 class ClipModel(nn.Module):
     def __init__(self, name, opt, num_classes=1):
         super(ClipModel, self).__init__()
         self.use_svd = opt.use_svd
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # add this line by dahye
         
         if self.use_svd:
+            # [dahye modi start]
             self.model = CLIPModel.from_pretrained(name)
+            # if os.path.exists(name):
+            #     print(f"Loading from local path: {name}")
+            #     self.model = CLIPModel.from_pretrained(name, local_files_only=True)
+            # else:
+            #     print(f"Loading from Hugging Face: {name}")
+            #     self.model = CLIPModel.from_pretrained(name)
+            self.model = self.model.to(self.device)
+            # [dahye modi end]
             self.model.vision_model = apply_svd_residual_to_self_attn(self.model.vision_model, r=1024-1)
             
             for name, param in self.model.vision_model.named_parameters():
@@ -24,8 +37,17 @@ class ClipModel(nn.Module):
             
             self.fc = nn.Linear( 1024, num_classes )
         else:
+            # [dahye modi start]
             self.model = CLIPModel.from_pretrained(name)
-            
+            # if os.path.exists(name):
+            #     print(f"Loading from local path: {name}")
+            #     self.model = CLIPModel.from_pretrained(name, local_files_only=True)
+            # else:
+            #     print(f"Loading from Hugging Face: {name}")
+            #     self.model = CLIPModel.from_pretrained(name)
+            self.model = self.model.to(self.device)
+            # [dahye modi end]
+
             for name, param in self.model.vision_model.named_parameters():
                 print('{}: {}'.format(name, param.requires_grad))
             num_param = sum(p.numel() for p in self.model.vision_model.parameters() if p.requires_grad)

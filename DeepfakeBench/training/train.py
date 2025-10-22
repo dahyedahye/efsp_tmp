@@ -4,6 +4,7 @@
 # description: training code.
 
 import os
+import sys
 import argparse
 from os.path import join
 import cv2
@@ -26,15 +27,19 @@ import torch.optim as optim
 from torch.utils.data.distributed import DistributedSampler
 import torch.distributed as dist
 
+# 경로 설정
+current_file_path = os.path.abspath(__file__)
+parent_dir = os.path.dirname(os.path.dirname(current_file_path))
+sys.path.append(parent_dir)
+
+# Import 순서 중요
 from optimizor.SAM import SAM
 from optimizor.LinearLR import LinearDecayLR
-
 from trainer.trainer import Trainer
 from detectors import DETECTOR
-from dataset import *
+from dataset.abstract_dataset import DeepfakeAbstractBaseDataset
 from metrics.utils import parse_metric_for_print
-from logger import create_logger, RankFilter
-
+from logger import create_logger
 
 parser = argparse.ArgumentParser(description='Process some paths.')
 parser.add_argument('--detector_path', type=str,

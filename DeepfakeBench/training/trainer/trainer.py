@@ -30,6 +30,8 @@ from torch import distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from sklearn import metrics
 from metrics.utils import get_test_metrics
+from methods.stay_positive import StayPositiveTrainer
+
 
 FFpp_pool=['FaceForensics++','FF-DF','FF-F2F','FF-FS','FF-NT']#
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,6 +83,16 @@ class Trainer(object):
                 self.config['model_name'] + task_str + '_' + self.timenow
             )
         os.makedirs(self.log_dir, exist_ok=True)
+
+        if config.get('use_stay_positive', False):
+            self.stay_positive_trainer = StayPositiveTrainer(
+                model=model if type(model) is not DDP else model.module,
+                method=config.get('stay_positive_method', 'clamp'),
+                target_layer_name='head',  # Effort의 classifier 레이어
+                freeze_backbone=False
+            )
+        else:
+            self.stay_positive_trainer = None
 
     def get_writer(self, phase, dataset_key, metric_key):
         writer_key = f"{phase}-{dataset_key}-{metric_key}"
@@ -194,6 +206,9 @@ class Trainer(object):
                     self.optimizer.first_step(zero_grad=True)
                 else:
                     self.optimizer.second_step(zero_grad=True)
+                    # Stay-Positive 적용
+                    if self.stay_positive_trainer is not None:
+                        self.stay_positive_trainer.apply_stay_positive()
             return losses_first, pred_first
         else:
 
@@ -206,6 +221,10 @@ class Trainer(object):
             losses['overall'].backward()
             #self.model.module.set_mask_grad()
             self.optimizer.step()
+
+            # Stay-Positive 적용
+            if self.stay_positive_trainer is not None:
+                self.stay_positive_trainer.apply_stay_positive()
 
 
             return losses,predictions

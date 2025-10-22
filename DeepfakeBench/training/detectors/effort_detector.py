@@ -32,8 +32,19 @@ class EffortDetector(nn.Module):
     def __init__(self, config=None):
         super(EffortDetector, self).__init__()
         self.config = config
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # added by dahye
         self.backbone = self.build_backbone(config)
-        self.head = nn.Linear(1024, 2)
+        # edited by dahye start
+        # self.head = nn.Linear(1024, 2)
+        # MLP classifier with ReLU - stay-positive 적용 위해 추가
+        hidden_dim = 512  # 또는 config에서 읽어오기
+        self.head = nn.Sequential(
+            nn.Linear(1024, hidden_dim),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),  # 선택적
+            nn.Linear(hidden_dim, 2)
+        )
+        # edited by dahye end
         self.loss_func = nn.CrossEntropyLoss()
         self.prob, self.label = [], []
         self.correct, self.total = 0, 0
@@ -46,7 +57,12 @@ class EffortDetector(nn.Module):
         # std: [0.26862954, 0.26130258, 0.27577711]
         
         # ViT-L/14 224*224
-        clip_model = CLIPModel.from_pretrained("../models--openai--clip-vit-large-patch14")  # the path of this folder in your disk (download from the above link)
+        # clip_model = CLIPModel.from_pretrained("../models--openai--clip-vit-large-patch14")  # the path of this folder in your disk (download from the above link)
+        clip_model = CLIPModel.from_pretrained("/home/dahye/workspace/iclr/baseline/effort/Effort-AIGI-Detection/models/models--openai--clip-vit-large-patch14")  # the path of this folder in your disk (download from the above link)
+        # clip_model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+        clip_model = clip_model.to(self.device)  # add this line, move the clip model to gpu first then do the SVD, added by dahye
+        # clip_model = CLIPModel.from_pretrained("/workspace/Effort-AIGI-Detection/models/models--openai--clip-vit-large-patch14")  # the path of this folder in your disk (download from the above link)
+        # clip_model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
 
         # Apply SVD to self_attn layers only
         # ViT-L/14 224*224: 1024-1
@@ -62,6 +78,7 @@ class EffortDetector(nn.Module):
 
     def features(self, data_dict: dict) -> torch.tensor:
         feat = self.backbone(data_dict['image'])['pooler_output']
+        # print(f"feat shape: {feat.shape}") # dahye
         return feat
 
     def classifier(self, features: torch.tensor) -> torch.tensor:

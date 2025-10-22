@@ -1,10 +1,17 @@
 # log dir 
-log_dir: ./zhiyuanyan/logs/benchv2/icml25/release
+# log_dir: ./zhiyuanyan/logs/benchv2/icml25/release
+log_dir: ./logs/effort_stay_positive
 
 # model setting
 pretrained: 'no need to provide this for the effort model'
 model_name: effort   # model name
 backbone_name: vit  # backbone name
+
+# MLP head settings
+use_mlp_head: true
+mlp_hidden_dims: [512]
+mlp_dropout: 0.5
+mlp_batch_norm: true
 
 #backbone setting
 backbone_config:
@@ -86,3 +93,7 @@ cuda: true   # whether to use CUDA acceleration
 cudnn: true   # whether to use CuDNN for convolution operations
 
 save_avg: true
+
+# Stay-Positive 설정
+use_stay_positive: true
+stay_positive_method: clamp 

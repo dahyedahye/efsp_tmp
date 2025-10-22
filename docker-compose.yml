@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  effort:
+    build: .
+    image: effort:latest
+    container_name: effort_container
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0','1','2','3','4','5','6','7']  # 사용할 GPU 지정
+              capabilities: [gpu]
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # 프로젝트 코드
+      - /home/dahye/workspace/iclr/baseline/effort:/workspace
+      # 데이터셋 (읽기 전용)
+      - /dev/shm/dahye_tmp/datasets:/datasets:ro
+      # 출력 결과 (읽기/쓰기)
+      - /dev/shm/dahye_tmp/outputs_effort:/outputs:rw
+      # 백업
+      - /data/backups/dahye_tmp:/backups:rw
+      # 체크포인트 저장
+      - /dev/shm/dahye_tmp/checkpoints_effort:/checkpoints:rw
+      # PyTorch 캐시
+      - ~/.cache/torch:/root/.cache/torch
+      # Hugging Face 캐시 (CLIP 모델 등)
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    shm_size: '32gb'  # 대용량 배치 처리를 위해 증가
+    stdin_open: true
+    tty: true
